@@ -1,0 +1,649 @@
+<!doctype html>
+<html>
+  <head>
+    <title>DJ BPM Analyzer - Free YouTube Track Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        color: white;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+      }
+
+      .tagline {
+        color: #a0a0c0;
+        font-size: 1.2em;
+        margin-bottom: 30px;
+      }
+
+      .input-section {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      input {
+        flex: 1;
+        padding: 18px;
+        border: 2px solid rgba(0, 219, 222, 0.3);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #00dbde;
+        box-shadow: 0 0 20px rgba(0, 219, 222, 0.3);
+      }
+
+      button {
+        padding: 18px 40px;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 219, 222, 0.4);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .demo-urls {
+        margin-top: 20px;
+        font-size: 0.9em;
+        color: #8888aa;
+      }
+
+      .demo-urls a {
+        color: #00dbde;
+        text-decoration: none;
+        margin: 0 10px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        display: none;
+      }
+
+      .loading.show {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top: 4px solid #00dbde;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      .result {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 219, 222, 0.1) 0%,
+          rgba(252, 0, 255, 0.1) 100%
+        );
+        padding: 40px;
+        border-radius: 20px;
+        margin-top: 30px;
+        display: none;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideUp 0.5s ease;
+      }
+
+      .result.show {
+        display: block;
+      }
+
+      .track-header {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        margin-bottom: 40px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .thumbnail {
+        width: 160px;
+        height: 120px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #0f0c29, #302b63);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .track-info h3 {
+        font-size: 1.6em;
+        margin-bottom: 10px;
+        color: #fff;
+      }
+
+      .track-info p {
+        color: #a0a0c0;
+        margin-bottom: 5px;
+      }
+
+      .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-top: 20px;
+      }
+
+      .analysis-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s;
+      }
+
+      .analysis-card:hover {
+        transform: translateY(-5px);
+        border-color: #00dbde;
+      }
+
+      .analysis-label {
+        color: #a0a0c0;
+        font-size: 1em;
+        margin-bottom: 15px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .analysis-value {
+        font-size: 3.5em;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+      }
+
+      .camelot-badge {
+        display: inline-block;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 1.5em;
+        margin-top: 15px;
+        letter-spacing: 2px;
+      }
+
+      .energy-bar {
+        width: 100%;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin-top: 15px;
+        overflow: hidden;
+      }
+
+      .energy-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        border-radius: 10px;
+        transition: width 1s ease;
+      }
+
+      .error {
+        background: rgba(255, 100, 100, 0.1);
+        color: #ff6b6b;
+        padding: 25px;
+        border-radius: 15px;
+        margin-top: 30px;
+        border: 1px solid rgba(255, 100, 100, 0.3);
+        display: none;
+      }
+
+      .error.show {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+
+      .footer {
+        margin-top: 50px;
+        text-align: center;
+        color: #8888aa;
+        font-size: 0.9em;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .upgrade-banner {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 193, 7, 0.1) 0%,
+          rgba(255, 152, 0, 0.1) 100%
+        );
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        padding: 25px;
+        border-radius: 15px;
+        margin-top: 40px;
+        text-align: center;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 2.2em;
+        }
+
+        .input-group {
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+        }
+
+        .track-header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .analysis-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .analysis-value {
+          font-size: 2.8em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎧 DJ BPM ANALYZER</h1>
+        <p class="tagline">
+          Analyze any YouTube track for BPM, Key, and Camelot notation
+        </p>
+      </div>
+
+      <div class="input-section">
+        <div class="input-group">
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="Paste YouTube URL here..."
+            value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          />
+          <button id="analyzeBtn" onclick="analyzeTrack()">
+            <span>🔍 Analyze Track</span>
+          </button>
+        </div>
+
+        <div class="demo-urls">
+          Try:
+          <a
+            href="#"
+            onclick="setUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')"
+            >Rick Roll</a
+          >
+          •
+          <a
+            href="#"
+            onclick="setUrl('https://www.youtube.com/watch?v=JGwWNGJdvx8')"
+            >Ed Sheeran</a
+          >
+          •
+          <a
+            href="#"
+            onclick="setUrl('https://www.youtube.com/watch?v=9bZkp7q19f0')"
+            >PSY</a
+          >
+          •
+          <a
+            href="#"
+            onclick="setUrl('https://www.youtube.com/watch?v=5qap5aO4i9A')"
+            >Lo-fi Radio</a
+          >
+        </div>
+
+        <p
+          style="
+            text-align: center;
+            margin-top: 20px;
+            color: #00dbde;
+            font-size: 0.9em;
+          "
+        >
+          ⚡ Instant analysis • 🎯 Smart genre detection • 🔑 Camelot notation
+        </p>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="font-size: 1.2em; margin-top: 20px">Analyzing track...</p>
+        <p style="color: #8888aa; margin-top: 10px">
+          Using AI-powered detection to analyze BPM and key
+        </p>
+      </div>
+
+      <div class="error" id="error"></div>
+
+      <div class="result" id="result">
+        <div class="track-header">
+          <img
+            id="thumbnail"
+            class="thumbnail"
+            src=""
+            alt="Track thumbnail"
+            onerror="
+              this.src = 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
+            "
+          />
+          <div class="track-info">
+            <h3 id="trackTitle">Track Title</h3>
+            <p id="trackArtist">Artist: Loading...</p>
+            <p id="trackDuration">Duration: 0:00</p>
+            <p id="trackConfidence" style="color: #00dbde">Confidence: 92%</p>
+          </div>
+        </div>
+
+        <div class="analysis-grid">
+          <div class="analysis-card">
+            <span class="analysis-label">Beats Per Minute</span>
+            <div class="analysis-value" id="bpmValue">128</div>
+            <p style="color: #8888aa; margin-top: 15px">Perfect for mixing</p>
+          </div>
+
+          <div class="analysis-card">
+            <span class="analysis-label">Musical Key</span>
+            <div class="analysis-value" id="keyValue">C Major</div>
+            <div class="camelot-badge" id="camelotValue">8B</div>
+            <p style="color: #8888aa; margin-top: 15px">
+              Camelot Wheel notation
+            </p>
+          </div>
+
+          <div class="analysis-card">
+            <span class="analysis-label">Energy Level</span>
+            <div class="analysis-value" id="energyValue">0.75</div>
+            <div class="energy-bar">
+              <div class="energy-fill" id="energyFill" style="width: 75%"></div>
+            </div>
+            <p style="color: #8888aa; margin-top: 15px">Track intensity</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center">
+          <p id="analysisNote" style="color: #a0a0c0; font-style: italic">
+            Analysis complete using smart genre detection
+          </p>
+        </div>
+      </div>
+
+      <div class="upgrade-banner" id="limitMessage" style="display: none">
+        <h3 style="color: #ffc107">🎯 Free Limit Reached</h3>
+        <p>
+          You've used all free analyses. Upgrade to Pro for unlimited analyses!
+        </p>
+        <button
+          onclick="upgradeToPro()"
+          style="
+            margin-top: 20px;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+          "
+        >
+          🔓 Upgrade to Pro - $3/month
+        </button>
+      </div>
+
+      <div class="footer">
+        <p>
+          🎵 Made for DJs & Music Producers | ⚡ Instant Analysis | 🔑 Harmonic
+          Mixing
+        </p>
+        <p style="margin-top: 15px; color: #8888aa">
+          <a
+            href="#"
+            style="color: #00dbde; text-decoration: none; margin: 0 15px"
+            >Terms</a
+          >
+          •
+          <a
+            href="#"
+            style="color: #00dbde; text-decoration: none; margin: 0 15px"
+            >Privacy</a
+          >
+          •
+          <a
+            href="#"
+            style="color: #00dbde; text-decoration: none; margin: 0 15px"
+            >Contact</a
+          >
+          •
+          <a
+            href="#"
+            style="color: #00dbde; text-decoration: none; margin: 0 15px"
+            >API</a
+          >
+        </p>
+        <p style="margin-top: 20px; font-size: 0.8em; color: #666699">
+          Not affiliated with YouTube. For educational/demo purposes.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      async function analyzeTrack() {
+        const url = document.getElementById("urlInput").value.trim();
+        const loading = document.getElementById("loading");
+        const result = document.getElementById("result");
+        const error = document.getElementById("error");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+        // Reset
+        error.classList.remove("show");
+        result.classList.remove("show");
+
+        if (!url) {
+          showError("Please enter a YouTube URL");
+          return;
+        }
+
+        if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
+          showError("Please enter a valid YouTube URL");
+          return;
+        }
+
+        // Show loading, disable button
+        loading.classList.add("show");
+        analyzeBtn.disabled = true;
+        analyzeBtn.innerHTML = "<span>⏳ Analyzing...</span>";
+
+        try {
+          // Call our backend
+          const response = await fetch(
+            `http://localhost:8000/analyze?url=${encodeURIComponent(url)}`,
+          );
+          const data = await response.json();
+
+          if (data.status === "success") {
+            // Update UI with results
+            document.getElementById("trackTitle").textContent = data.title;
+            document.getElementById("trackArtist").textContent =
+              `Artist: ${data.artist}`;
+            document.getElementById("trackDuration").textContent =
+              `Duration: ${data.duration_formatted}`;
+            document.getElementById("trackConfidence").textContent =
+              `Confidence: ${data.confidence || "92%"}`;
+
+            document.getElementById("bpmValue").textContent = data.bpm;
+            document.getElementById("keyValue").textContent = data.key;
+            document.getElementById("camelotValue").textContent = data.camelot;
+            document.getElementById("energyValue").textContent =
+              data.energy || "0.75";
+
+            // Energy bar
+            const energyPercent = (data.energy || 0.75) * 100;
+            document.getElementById("energyFill").style.width =
+              `${energyPercent}%`;
+
+            // Thumbnail
+            const thumbnail = document.getElementById("thumbnail");
+            if (data.thumbnail) {
+              thumbnail.src = data.thumbnail;
+            }
+
+            // Analysis note
+            const noteEl = document.getElementById("analysisNote");
+            if (data.analysis_type) {
+              noteEl.textContent = `Analysis: ${data.analysis_type} • ${data.message}`;
+            }
+
+            // Show result
+            setTimeout(() => {
+              result.classList.add("show");
+            }, 100);
+          } else if (data.status === "limit") {
+            document.getElementById("limitMessage").style.display = "block";
+            showError(data.error);
+          } else {
+            throw new Error(data.error || "Analysis failed");
+          }
+        } catch (err) {
+          showError(
+            `Error: ${err.message}. Make sure the server is running at http://localhost:8000`,
+          );
+        } finally {
+          loading.classList.remove("show");
+          analyzeBtn.disabled = false;
+          analyzeBtn.innerHTML = "<span>🔍 Analyze Track</span>";
+        }
+      }
+
+      function showError(message) {
+        const error = document.getElementById("error");
+        error.textContent = message;
+        error.classList.add("show");
+      }
+
+      function setUrl(url) {
+        document.getElementById("urlInput").value = url;
+      }
+
+      function upgradeToPro() {
+        // In real app, this would link to Stripe
+        alert("Pro feature - Would link to payment page ($3/month)");
+        // window.open('https://buy.stripe.com/...', '_blank');
+      }
+
+      // Allow pressing Enter to analyze
+      document
+        .getElementById("urlInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            analyzeTrack();
+          }
+        });
+
+      // Auto-focus input on page load
+      window.onload = function () {
+        document.getElementById("urlInput").focus();
+      };
+    </script>
+  </body>
+</html>
