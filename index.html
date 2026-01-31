@@ -116,6 +116,11 @@
         color: #00dbde;
         text-decoration: none;
         margin: 0 10px;
+        cursor: pointer;
+      }
+
+      .demo-urls a:hover {
+        text-decoration: underline;
       }
 
       .loading {
@@ -268,6 +273,36 @@
         animation: fadeIn 0.5s;
       }
 
+      .api-status {
+        background: rgba(0, 219, 222, 0.1);
+        color: #00dbde;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .api-status.offline {
+        background: rgba(255, 100, 100, 0.1);
+        color: #ff6b6b;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #00dbde;
+        animation: pulse 2s infinite;
+      }
+
+      .api-status.offline .status-dot {
+        background: #ff6b6b;
+      }
+
       .footer {
         margin-top: 50px;
         text-align: center;
@@ -319,6 +354,16 @@
         }
       }
 
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
       @media (max-width: 768px) {
         .container {
           padding: 20px;
@@ -358,6 +403,10 @@
         <p class="tagline">
           Analyze any YouTube track for BPM, Key, and Camelot notation
         </p>
+        <div class="api-status" id="apiStatus">
+          <div class="status-dot"></div>
+          <span>API Status: Checking...</span>
+        </div>
       </div>
 
       <div class="input-section">
@@ -430,7 +479,8 @@
             src=""
             alt="Track thumbnail"
             onerror="
-              this.src = 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
+              this.onerror = null;
+              this.src = 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg';
             "
           />
           <div class="track-info">
@@ -474,51 +524,26 @@
         </div>
       </div>
 
-      <div class="upgrade-banner" id="limitMessage" style="display: none">
-        <h3 style="color: #ffc107">🎯 Free Limit Reached</h3>
-        <p>
-          You've used all free analyses. Upgrade to Pro for unlimited analyses!
-        </p>
-        <button
-          onclick="upgradeToPro()"
-          style="
-            margin-top: 20px;
-            padding: 15px 40px;
-            background: linear-gradient(90deg, #ffc107, #ff9800);
-          "
-        >
-          🔓 Upgrade to Pro - $3/month
-        </button>
-      </div>
-
       <div class="footer">
         <p>
           🎵 Made for DJs & Music Producers | ⚡ Instant Analysis | 🔑 Harmonic
           Mixing
         </p>
         <p style="margin-top: 15px; color: #8888aa">
+          <span style="color: #00dbde; margin: 0 15px">Backend API: Live</span>
+          •
           <a
-            href="#"
+            href="https://render.com"
+            target="_blank"
             style="color: #00dbde; text-decoration: none; margin: 0 15px"
-            >Terms</a
+            >Powered by Render</a
           >
           •
           <a
-            href="#"
+            href="https://github.com/kalvisl/dj-tool"
+            target="_blank"
             style="color: #00dbde; text-decoration: none; margin: 0 15px"
-            >Privacy</a
-          >
-          •
-          <a
-            href="#"
-            style="color: #00dbde; text-decoration: none; margin: 0 15px"
-            >Contact</a
-          >
-          •
-          <a
-            href="#"
-            style="color: #00dbde; text-decoration: none; margin: 0 15px"
-            >API</a
+            >GitHub</a
           >
         </p>
         <p style="margin-top: 20px; font-size: 0.8em; color: #666699">
@@ -528,6 +553,40 @@
     </div>
 
     <script>
+      // API Configuration - UPDATE THIS WITH YOUR RENDER URL
+      const API_BASE_URL = "https://dj-tool.onrender.com";
+      // If your app is named differently, change it above
+      // Options:
+      // - https://dj-bpm-analyzer.onrender.com
+      // - https://dj-tool.onrender.com
+      // - https://your-app-name.onrender.com
+
+      // Check API status on load
+      async function checkApiStatus() {
+        const statusEl = document.getElementById("apiStatus");
+        try {
+          const response = await fetch(`${API_BASE_URL}/`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(5000), // 5 second timeout
+          });
+
+          if (response.ok) {
+            statusEl.innerHTML =
+              '<div class="status-dot"></div><span>API Status: Online ✓</span>';
+            statusEl.classList.remove("offline");
+            return true;
+          } else {
+            throw new Error("API offline");
+          }
+        } catch (error) {
+          statusEl.innerHTML =
+            '<div class="status-dot"></div><span>API Status: Offline (Using demo mode)</span>';
+          statusEl.classList.add("offline");
+          return false;
+        }
+      }
+
       async function analyzeTrack() {
         const url = document.getElementById("urlInput").value.trim();
         const loading = document.getElementById("loading");
@@ -538,6 +597,7 @@
         // Reset
         error.classList.remove("show");
         result.classList.remove("show");
+        error.textContent = "";
 
         if (!url) {
           showError("Please enter a YouTube URL");
@@ -545,7 +605,9 @@
         }
 
         if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
-          showError("Please enter a valid YouTube URL");
+          showError(
+            "Please enter a valid YouTube URL (youtube.com or youtu.be)",
+          );
           return;
         }
 
@@ -555,10 +617,18 @@
         analyzeBtn.innerHTML = "<span>⏳ Analyzing...</span>";
 
         try {
-          // Call our backend
-          const response = await fetch(
-            `http://localhost:8000/analyze?url=${encodeURIComponent(url)}`,
-          );
+          // Call our Render backend API
+          const apiUrl = `${API_BASE_URL}/analyze?url=${encodeURIComponent(url)}`;
+          console.log("Calling API:", apiUrl);
+
+          const response = await fetch(apiUrl, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          });
+
           const data = await response.json();
 
           if (data.status === "success") {
@@ -575,7 +645,7 @@
             document.getElementById("keyValue").textContent = data.key;
             document.getElementById("camelotValue").textContent = data.camelot;
             document.getElementById("energyValue").textContent =
-              data.energy || "0.75";
+              data.energy?.toFixed(2) || "0.75";
 
             // Energy bar
             const energyPercent = (data.energy || 0.75) * 100;
@@ -586,6 +656,10 @@
             const thumbnail = document.getElementById("thumbnail");
             if (data.thumbnail) {
               thumbnail.src = data.thumbnail;
+              thumbnail.onerror = function () {
+                this.src =
+                  "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg";
+              };
             }
 
             // Analysis note
@@ -598,16 +672,26 @@
             setTimeout(() => {
               result.classList.add("show");
             }, 100);
-          } else if (data.status === "limit") {
-            document.getElementById("limitMessage").style.display = "block";
-            showError(data.error);
           } else {
-            throw new Error(data.error || "Analysis failed");
+            throw new Error(data.error || data.message || "Analysis failed");
           }
         } catch (err) {
-          showError(
-            `Error: ${err.message}. Make sure the server is running at http://localhost:8000`,
-          );
+          console.error("API Error:", err);
+
+          // Fallback: Show demo data if API fails
+          if (
+            err.name === "TypeError" &&
+            err.message.includes("Failed to fetch")
+          ) {
+            showError(
+              "API server unreachable. The backend might be starting up (cold start takes ~30 seconds). Try again in a moment.",
+            );
+
+            // Optional: Show demo data anyway
+            // showDemoData(url);
+          } else {
+            showError(`Error: ${err.message}`);
+          }
         } finally {
           loading.classList.remove("show");
           analyzeBtn.disabled = false;
@@ -615,20 +699,68 @@
         }
       }
 
+      function showDemoData(url) {
+        // Fallback demo data if API is down
+        const demoData = {
+          status: "success",
+          bpm: Math.floor(Math.random() * 40) + 120,
+          key: ["C Major", "A Minor", "G Major", "E Minor"][
+            Math.floor(Math.random() * 4)
+          ],
+          camelot: ["8B", "8A", "9B", "9A"][Math.floor(Math.random() * 4)],
+          energy: (Math.random() * 0.5 + 0.5).toFixed(2),
+          title: "Demo Track",
+          artist: "Demo Artist",
+          duration: 180,
+          duration_formatted: "3:00",
+          thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+          message: "Demo mode - API offline",
+          analysis_type: "Demo analysis",
+          confidence: "85%",
+        };
+
+        // Update UI with demo data
+        document.getElementById("trackTitle").textContent = demoData.title;
+        document.getElementById("trackArtist").textContent =
+          `Artist: ${demoData.artist}`;
+        document.getElementById("trackDuration").textContent =
+          `Duration: ${demoData.duration_formatted}`;
+        document.getElementById("trackConfidence").textContent =
+          `Confidence: ${demoData.confidence}`;
+
+        document.getElementById("bpmValue").textContent = demoData.bpm;
+        document.getElementById("keyValue").textContent = demoData.key;
+        document.getElementById("camelotValue").textContent = demoData.camelot;
+        document.getElementById("energyValue").textContent = demoData.energy;
+
+        const energyPercent = parseFloat(demoData.energy) * 100;
+        document.getElementById("energyFill").style.width = `${energyPercent}%`;
+
+        const thumbnail = document.getElementById("thumbnail");
+        thumbnail.src = demoData.thumbnail;
+
+        document.getElementById("analysisNote").textContent =
+          `Analysis: ${demoData.analysis_type} • ${demoData.message}`;
+
+        setTimeout(() => {
+          document.getElementById("result").classList.add("show");
+        }, 100);
+      }
+
       function showError(message) {
         const error = document.getElementById("error");
         error.textContent = message;
         error.classList.add("show");
+
+        // Auto-hide error after 10 seconds
+        setTimeout(() => {
+          error.classList.remove("show");
+        }, 10000);
       }
 
       function setUrl(url) {
         document.getElementById("urlInput").value = url;
-      }
-
-      function upgradeToPro() {
-        // In real app, this would link to Stripe
-        alert("Pro feature - Would link to payment page ($3/month)");
-        // window.open('https://buy.stripe.com/...', '_blank');
+        document.getElementById("urlInput").focus();
       }
 
       // Allow pressing Enter to analyze
@@ -643,6 +775,10 @@
       // Auto-focus input on page load
       window.onload = function () {
         document.getElementById("urlInput").focus();
+        checkApiStatus();
+
+        // Check API status every 30 seconds
+        setInterval(checkApiStatus, 30000);
       };
     </script>
   </body>
