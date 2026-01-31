@@ -1,3 +1,7 @@
+yt-dlp==2024.11.11
+librosa==0.10.1
+pydub==0.25.1
+numpy==1.26.4
 fastapi==0.128.0
 uvicorn==0.39.0
 requests==2.32.5

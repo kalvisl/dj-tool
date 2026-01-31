@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import requests
 import random
-from datetime import datetime
 
 app = FastAPI(title="DJ BPM Analyzer")
 
@@ -152,14 +151,4 @@ async def analyze(url: str):
             "confidence": "85%"
         }
 
-if __name__ == "__main__":
-    print("=" * 60)
-    print("🎧 DJ BPM ANALYZER - ALWAYS WORKS")
-    print("📡 Server: http://localhost:8000")
-    print("✨ Features:")
-    print("   • Smart genre detection")
-    print("   • AI-powered BPM estimation")
-    print("   • Works with ANY YouTube URL")
-    print("   • No downloads needed")
-    print("=" * 60)
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# No __main__ block needed - Render runs uvicorn command separately
