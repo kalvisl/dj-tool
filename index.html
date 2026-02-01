@@ -144,6 +144,49 @@
         margin: 0 auto 20px;
       }
 
+      .progress-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 30px auto;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 15px 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+        width: 0%;
+      }
+
+      .progress-text {
+        color: #a0a0c0;
+        font-size: 0.9em;
+        margin-top: 10px;
+        min-height: 20px;
+      }
+
+      .progress-stage {
+        color: #00dbde;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9em;
+      }
+
       .result {
         background: linear-gradient(
           135deg,
@@ -467,6 +510,25 @@
         <p style="color: #8888aa; margin-top: 10px">
           Using AI-powered detection to analyze BPM and key
         </p>
+
+        <!-- Progress tracking container -->
+        <div
+          class="progress-container"
+          id="progressContainer"
+          style="display: none"
+        >
+          <div class="progress-stage" id="progressStage">
+            Starting analysis...
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              id="progressFill"
+              style="width: 0%"
+            ></div>
+          </div>
+          <div class="progress-text" id="progressText">Initializing...</div>
+        </div>
       </div>
 
       <div class="error" id="error"></div>
@@ -554,6 +616,8 @@
 
     <script>
       // API Configuration - UPDATE THIS WITH YOUR RENDER URL
+      // For local testing: "http://localhost:8002"
+      // For production: "https://dj-tool.onrender.com"
       const API_BASE_URL = "https://dj-tool.onrender.com";
       // If your app is named differently, change it above
       // Options:
@@ -587,17 +651,28 @@
         }
       }
 
+      // Global variables for progress tracking
+      let progressInterval = null;
+      let currentVideoId = null;
+
       async function analyzeTrack() {
         const url = document.getElementById("urlInput").value.trim();
         const loading = document.getElementById("loading");
         const result = document.getElementById("result");
         const error = document.getElementById("error");
         const analyzeBtn = document.getElementById("analyzeBtn");
+        const progressContainer = document.getElementById("progressContainer");
 
         // Reset
         error.classList.remove("show");
         result.classList.remove("show");
         error.textContent = "";
+
+        // Clear any existing progress interval
+        if (progressInterval) {
+          clearInterval(progressInterval);
+          progressInterval = null;
+        }
 
         if (!url) {
           showError("Please enter a YouTube URL");
@@ -613,13 +688,23 @@
 
         // Show loading, disable button
         loading.classList.add("show");
+        progressContainer.style.display = "block";
         analyzeBtn.disabled = true;
         analyzeBtn.innerHTML = "<span>⏳ Analyzing...</span>";
+
+        // Initialize progress display
+        document.getElementById("progressStage").textContent =
+          "Starting analysis...";
+        document.getElementById("progressFill").style.width = "0%";
+        document.getElementById("progressText").textContent = "Initializing...";
 
         try {
           // Call our Render backend API
           const apiUrl = `${API_BASE_URL}/analyze?url=${encodeURIComponent(url)}`;
           console.log("Calling API:", apiUrl);
+
+          // Start progress polling
+          startProgressPolling(url);
 
           const response = await fetch(apiUrl, {
             method: "GET",
@@ -632,6 +717,15 @@
           const data = await response.json();
 
           if (data.status === "success") {
+            // Stop progress polling
+            if (progressInterval) {
+              clearInterval(progressInterval);
+              progressInterval = null;
+            }
+
+            // Update progress to 100%
+            updateProgressDisplay(100, "complete", "Analysis complete!");
+
             // Update UI with results
             document.getElementById("trackTitle").textContent = data.title;
             document.getElementById("trackArtist").textContent =
@@ -678,6 +772,15 @@
         } catch (err) {
           console.error("API Error:", err);
 
+          // Stop progress polling
+          if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+          }
+
+          // Update progress to show error
+          updateProgressDisplay(0, "error", `Error: ${err.message}`);
+
           // Fallback: Show demo data if API fails
           if (
             err.name === "TypeError" &&
@@ -693,9 +796,102 @@
             showError(`Error: ${err.message}`);
           }
         } finally {
-          loading.classList.remove("show");
-          analyzeBtn.disabled = false;
-          analyzeBtn.innerHTML = "<span>🔍 Analyze Track</span>";
+          // Keep loading visible for a moment to show completion
+          setTimeout(() => {
+            loading.classList.remove("show");
+            progressContainer.style.display = "none";
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = "<span>🔍 Analyze Track</span>";
+          }, 1000);
+        }
+      }
+
+      function startProgressPolling(url) {
+        // Extract video ID from URL
+        let videoId = "unknown";
+        try {
+          if (url.includes("v=")) {
+            videoId = url.split("v=")[1].split("&")[0];
+          } else if (url.includes("youtu.be/")) {
+            videoId = url.split("youtu.be/")[1].split("?")[0];
+          }
+        } catch (e) {
+          console.error("Could not extract video ID:", e);
+        }
+
+        currentVideoId = videoId;
+
+        // Start polling for progress
+        progressInterval = setInterval(async () => {
+          try {
+            const progressUrl = `${API_BASE_URL}/analyze/progress/${videoId}`;
+            const response = await fetch(progressUrl, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+            });
+
+            if (response.ok) {
+              const progressData = await response.json();
+              updateProgressDisplay(
+                progressData.progress,
+                progressData.stage,
+                progressData.message,
+              );
+
+              // If analysis is complete or errored, stop polling
+              if (
+                progressData.stage === "complete" ||
+                progressData.stage === "error" ||
+                progressData.stage === "cached"
+              ) {
+                if (progressInterval) {
+                  clearInterval(progressInterval);
+                  progressInterval = null;
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Progress polling error:", error);
+            // Don't stop polling on temporary errors
+          }
+        }, 1000); // Poll every second
+      }
+
+      function updateProgressDisplay(progress, stage, message) {
+        // Update progress bar
+        const progressFill = document.getElementById("progressFill");
+        progressFill.style.width = `${progress}%`;
+
+        // Update stage text
+        const progressStage = document.getElementById("progressStage");
+        let stageText = stage;
+        if (stage === "starting") stageText = "Starting analysis";
+        else if (stage === "downloading") stageText = "Downloading audio";
+        else if (stage === "analyzing") stageText = "Analyzing audio";
+        else if (stage === "caching") stageText = "Caching results";
+        else if (stage === "cached") stageText = "Loaded from cache";
+        else if (stage === "complete") stageText = "Analysis complete";
+        else if (stage === "error") stageText = "Error occurred";
+
+        progressStage.textContent = stageText.toUpperCase();
+
+        // Update message text
+        const progressText = document.getElementById("progressText");
+        progressText.textContent = message || `Progress: ${progress}%`;
+
+        // Update progress bar color based on stage
+        if (stage === "error") {
+          progressFill.style.background =
+            "linear-gradient(90deg, #ff6b6b, #ff4757)";
+        } else if (stage === "complete" || stage === "cached") {
+          progressFill.style.background =
+            "linear-gradient(90deg, #00dbde, #00ff9d)";
+        } else {
+          progressFill.style.background =
+            "linear-gradient(90deg, #00dbde, #fc00ff)";
         }
       }
 
