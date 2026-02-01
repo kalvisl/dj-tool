@@ -26,7 +26,7 @@
 ### Deployment - ACTIVE
 
 - **Render**: Platform as a Service (PaaS) - ACTIVE
-- **Python 3.9.0**: Runtime specified in runtime.txt - CONFIGURED
+- **Python 3.13.4**: Default Python version used by Render - ACTIVE
 - **Uvicorn**: Production ASGI server - DEPLOYED
 - **GitHub**: Version control and auto-deploy trigger - ACTIVE
 - **Application URL**: https://dj-tool.onrender.com/ - VERIFIED WORKING
@@ -201,7 +201,7 @@ Smaller footprint optimized for Render free tier while maintaining full function
 - **Start command**: `uvicorn app_working:app --host 0.0.0.0 --port 10000` - ACTIVE
 - **Health check**: Automatic by Render on root endpoint - ACTIVE
 - **Auto-deploy**: On git push to main branch - ACTIVE
-- **Environment**: Python 3.9.0 - CONFIGURED
+- **Environment**: Python 3.13.4 - DEFAULT VERSION USED BY RENDER
 - **Application URL**: https://dj-tool.onrender.com/ - VERIFIED WORKING
 - **Plan**: Free tier with limitations
 
