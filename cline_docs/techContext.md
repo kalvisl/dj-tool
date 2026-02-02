@@ -10,8 +10,8 @@
 - **Requests 2.32.5**: HTTP library for API calls - DEPLOYED
 - **librosa 0.11.0**: Audio analysis library for BPM/key detection - DEPLOYED
 - **yt-dlp 2025.10.14**: YouTube audio downloader - DEPLOYED
-- **NumPy 2.0.2**: Numerical computing for audio processing - DEPLOYED
-- **SciPy 1.11.4**: Scientific computing for signal processing - DEPLOYED (updated to fix deployment)
+- **NumPy 1.24.0**: Numerical computing for audio processing - DEPLOYED
+- **SciPy 1.10.1**: Scientific computing for signal processing - DEPLOYED
 - **SoundFile 0.13.1**: Audio file I/O operations - DEPLOYED
 - **AudioRead 3.1.0**: Audio decoding for various formats - DEPLOYED
 
@@ -26,7 +26,7 @@
 ### Deployment - ACTIVE
 
 - **Render**: Platform as a Service (PaaS) - ACTIVE
-- **Python 3.13.4**: Default Python version used by Render - ACTIVE
+- **Python 3.11.0**: Set via PYTHON_VERSION environment variable - ACTIVE
 - **Uvicorn**: Production ASGI server - DEPLOYED
 - **GitHub**: Version control and auto-deploy trigger - ACTIVE
 - **Application URL**: https://dj-tool.onrender.com/ - VERIFIED WORKING
@@ -173,15 +173,15 @@ Full development dependencies including:
 
 ### requirements_clean.txt - DEPLOYED
 
-Minimal dependencies for deployment (UPDATED Feb 1, 2026):
+Minimal dependencies for deployment (UPDATED Feb 2, 2026):
 
 - fastapi==0.128.0
 - uvicorn==0.39.0
 - requests==2.32.5
 - yt-dlp==2025.10.14
 - librosa==0.11.0
-- numpy==2.0.2
-- scipy==1.11.4 # Updated from 1.13.1 to fix deployment
+- numpy==1.24.0
+- scipy==1.10.1
 - soundfile==0.13.1
 - audioread==3.1.0
 
@@ -201,7 +201,7 @@ Smaller footprint optimized for Render free tier while maintaining full function
 - **Start command**: `uvicorn app_working:app --host 0.0.0.0 --port 10000` - ACTIVE
 - **Health check**: Automatic by Render on root endpoint - ACTIVE
 - **Auto-deploy**: On git push to main branch - ACTIVE
-- **Environment**: Python 3.13.4 - DEFAULT VERSION USED BY RENDER
+- **Environment**: Python 3.11.0 - Set via PYTHON_VERSION environment variable
 - **Application URL**: https://dj-tool.onrender.com/ - VERIFIED WORKING
 - **Plan**: Free tier with limitations
 
@@ -284,8 +284,8 @@ Smaller footprint optimized for Render free tier while maintaining full function
 ### Libraries Used - DEPLOYED
 
 1. **librosa 0.11.0**: Audio analysis (BPM, key detection, chromagram) - DEPLOYED
-2. **numpy 2.0.2**: Numerical computing for audio processing - DEPLOYED
-3. **scipy 1.11.4**: Scientific computing for signal processing - DEPLOYED
+2. **numpy 1.24.0**: Numerical computing for audio processing - DEPLOYED
+3. **scipy 1.10.1**: Scientific computing for signal processing - DEPLOYED
 4. **soundfile 0.13.1**: Audio file I/O operations - DEPLOYED
 5. **audioread 3.1.0**: Audio decoding for various formats - DEPLOYED
 6. **yt-dlp 2025.10.14**: YouTube audio extraction - DEPLOYED
