@@ -23,13 +23,16 @@
 - **No external frameworks**: Vanilla JS for simplicity - DEPLOYED
 - **✅ FIXED**: API_BASE_URL updated to "https://dj-tool.onrender.com" - VERIFIED
 
-### Deployment - ACTIVE
+### Deployment - ACTIVE WITH CUSTOM DOMAIN
 
 - **Render**: Platform as a Service (PaaS) - ACTIVE
 - **Python 3.11.0**: Set via PYTHON_VERSION environment variable - ACTIVE
 - **Uvicorn**: Production ASGI server - DEPLOYED
 - **GitHub**: Version control and auto-deploy trigger - ACTIVE
-- **Application URL**: https://dj-tool.onrender.com/ - VERIFIED WORKING
+- **Primary Application URL**: https://tunesph.com/ - CUSTOM DOMAIN CONNECTED
+- **Render Application URL**: https://dj-tool.onrender.com/ - STILL ACCESSIBLE
+- **Custom Domain**: tunesph.com connected to Render deployment
+- **SSL Certificate**: Auto-provisioned by Render via Let's Encrypt
 
 ### Development Tools
 

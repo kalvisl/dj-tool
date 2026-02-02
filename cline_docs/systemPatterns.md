@@ -39,14 +39,17 @@ The DJ BPM Analyzer follows a client-server architecture with background job pro
   - Demo URLs with hover effects and pointer cursors
   - **✅ FIXED**: API_BASE_URL updated to "https://dj-tool.onrender.com" - VERIFIED
 
-### Deployment (Render) - ACTIVE
+### Deployment (Render) - ACTIVE WITH CUSTOM DOMAIN
 
 - **render.yaml**: Infrastructure as code - CONFIGURED
 - **Build Command**: `pip install -r requirements_clean.txt` - ACTIVE
 - **Start Command**: `uvicorn app_working:app --host 0.0.0.0 --port 10000` - ACTIVE
 - **Python Runtime**: Specified in runtime.txt (3.11.0) - CONFIGURED (updated to fix deployment)
 - **Auto-deploy**: Enabled from GitHub repository - ACTIVE
-- **Application URL**: https://dj-tool.onrender.com/ - VERIFIED WORKING
+- **Primary Application URL**: https://tunesph.com/ - CUSTOM DOMAIN CONNECTED
+- **Render Application URL**: https://dj-tool.onrender.com/ - STILL ACCESSIBLE
+- **Custom Domain**: tunesph.com connected to Render deployment
+- **SSL Certificate**: Auto-provisioned by Render via Let's Encrypt
 
 ## Key technical decisions
 
