@@ -1,5 +1,57 @@
 # Active Context
 
+## CURRENT ISSUE BEING WORKED ON (February 2, 2026 - Frontend Not Loading)
+
+**PROBLEM**: When accessing https://dj-tool.onrender.com/, the frontend HTML is not being served. Instead, users see JSON response:
+
+```json
+{
+  "message": "🎧 DJ BPM Analyzer v3.0 (with Background Jobs & Cache)",
+  "endpoints": {
+    "/": "This info page",
+    "/analyze/background": "POST - Create background analysis job (url parameter)",
+    "/analyze/background/{job_id}": "GET - Get job status",
+    "/cache/stats": "GET - Get cache statistics",
+    "/cache/clear": "POST - Clear cache",
+    "/cache/cleanup": "POST - Clean up expired cache entries"
+  }
+}
+```
+
+**ROOT CAUSE**: The FastAPI app (`app_working.py`) was returning JSON at the root endpoint (`/`) instead of serving the `index.html` file. Additionally, the frontend was trying to call endpoints that didn't exist:
+
+1. `/analyze` - Immediate analysis endpoint (missing)
+2. `/analyze/progress/{video_id}` - Progress tracking endpoint (missing)
+
+**SOLUTION IMPLEMENTED**:
+
+1. **Added static file serving**: Imported `StaticFiles` and `FileResponse` from FastAPI
+2. **Updated root endpoint**: Changed `/` to serve `index.html` using `FileResponse`
+3. **Added `/api` endpoint**: Moved the API info to `/api` endpoint
+4. **Added missing endpoints**:
+   - `/analyze` - Immediate analysis with smart genre detection (copied from `app_working_backup.py`)
+   - `/analyze/progress/{video_id}` - Progress tracking endpoint
+5. **Updated API info**: Added the new endpoints to the `/api` response
+
+**CHANGES MADE TO `app_working.py`**:
+
+- Added imports: `from fastapi.staticfiles import StaticFiles` and `from fastapi.responses import FileResponse`
+- Added static file mount: `app.mount("/static", StaticFiles(directory="."), name="static")`
+- Updated `/` endpoint to serve `index.html`
+- Added `/api` endpoint for API information
+- Added `/analyze` endpoint (immediate analysis)
+- Added `/analyze/progress/{video_id}` endpoint
+- Updated endpoint documentation in `/api` response
+
+**NEXT STEPS NEEDED**:
+
+1. **Commit and push changes**: The modified `app_working.py` needs to be committed and pushed to GitHub
+2. **Trigger Render deployment**: Render will auto-deploy when changes are pushed
+3. **Verify fix**: After deployment, check if https://dj-tool.onrender.com/ now shows the frontend HTML interface
+4. **Test functionality**: Verify that analysis works by testing with a YouTube URL
+
+**CURRENT STATUS**: Fixes implemented locally but not yet deployed. Git shows many changes in venv/ directory that should not be committed (already in .gitignore). Need to commit only `app_working.py` changes.
+
 ## LATEST DEPLOYMENT FIX (February 2, 2026 - Python Version Fix)
 
 **CRITICAL DEPLOYMENT FIX**: Resolved numpy installation failure on Render - Python 3.13.4 compatibility issue
