@@ -1,27 +1,55 @@
 # Active Context
 
-## DEPLOYMENT FIXES COMPLETED (February 1, 2026 - Latest Update)
+## LATEST DEPLOYMENT FIX (February 2, 2026 - Python Version Fix)
 
-**CRITICAL DEPLOYMENT FIX**: Resolved SciPy installation failure on Render - SECOND ATTEMPT
+**CRITICAL DEPLOYMENT FIX**: Resolved numpy installation failure on Render - Python 3.13.4 compatibility issue
 
-**PROBLEM**: Previous fix (SciPy 1.11.4) still failed because:
+**PROBLEM**: Build failed with "Cannot import 'setuptools.build_meta'" error because:
 
-1. SciPy 1.11.4 still requires Fortran compiler (gfortran) for source builds
-2. Render doesn't have Fortran compiler available
-3. SciPy 1.11.4 doesn't have pre-built wheels for Python 3.11 on Linux
+1. Render default Python version changed to 3.13.4 (for services after June 12, 2025)
+2. numpy 1.24.0 doesn't support Python 3.13.4 (no pre-built wheels)
+3. pip tried to build numpy from source and failed due to missing setuptools.build_meta
+4. runtime.txt (3.11.0) was being ignored by Render
 
 **SOLUTION IMPLEMENTED**:
 
-1. **Updated SciPy version**: Changed from `1.11.4` → `1.9.3` (has pre-built wheels for Python 3.11)
-2. **Committed and pushed**: Changes deployed to trigger new Render build (commit `3ad0d18`)
+1. **Added PYTHON_VERSION environment variable**: Set to `3.11.0` in render.yaml
+2. **Created .python-version file**: Additional method for Render to detect Python version
+3. **Updated requirements_clean.txt**: Confirmed numpy==1.24.0 and scipy==1.10.1 (compatible with Python 3.11.0)
+4. **Updated documentation**: techContext.md reflects correct versions and Python 3.11.0 configuration
+5. **Committed and pushed**: Changes deployed to trigger new Render build (commit `5dae21c`)
 
 **EXPECTED OUTCOME**:
 
-- SciPy 1.9.3 has pre-built wheels for Python 3.11 on Linux
-- Should install without Fortran compilation
+- Render will use Python 3.11.0 instead of default 3.13.4
+- numpy 1.24.0 has pre-built wheels for Python 3.11.0
+- All dependencies will install without source compilation
 - Deployment should complete successfully
 
-**CURRENT DEPLOYMENT STATUS**: New build triggered after commit `3ad0d18`
+**CURRENT DEPLOYMENT STATUS**: New build triggered after commit `5dae21c` - awaiting completion
+
+## PREVIOUS DEPLOYMENT FIX (February 2, 2026 - SciPy Compatibility)
+
+**CRITICAL DEPLOYMENT FIX**: Resolved SciPy installation failure on Render - COMPATIBILITY FIX
+
+**PROBLEM**: Build failed with Fortran compiler error because:
+
+1. SciPy 1.9.3 still tried to compile from source (no wheel for Python 3.11 on Linux)
+2. Numpy 2.0.2 is incompatible with older SciPy versions
+3. Render doesn't have Fortran compiler (gfortran) available
+
+**SOLUTION IMPLEMENTED**:
+
+1. **Updated SciPy version**: Changed from `1.9.3` → `1.10.1` (better wheel support)
+2. **Updated Numpy version**: Changed from `2.0.2` → `1.24.0` (compatible with SciPy 1.10.1)
+3. **Committed and pushed**: Changes deployed to trigger new Render build (commit `064fdf1`)
+
+**EXPECTED OUTCOME**:
+
+- SciPy 1.10.1 has better wheel support for Python 3.11 on Linux
+- Numpy 1.24.0 is compatible with SciPy 1.10.1
+- Should install without Fortran compilation
+- Deployment should complete successfully
 
 ## PREVIOUS DEPLOYMENT FIX (February 1, 2026)
 
