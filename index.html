@@ -54,9 +54,10 @@
       h1 {
         font-size: 3em;
         margin-bottom: 10px;
-        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        background: var(--harmony-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
         font-weight: 800;
       }
 
@@ -99,7 +100,11 @@
 
       button {
         padding: 18px 40px;
-        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        background: linear-gradient(
+          90deg,
+          var(--harmony-primary),
+          var(--harmony-primary-dark)
+        );
         color: white;
         border: none;
         border-radius: 12px;
@@ -114,8 +119,13 @@
       }
 
       button:hover {
+        background: linear-gradient(
+          90deg,
+          var(--harmony-primary-dark),
+          #0369a1
+        );
         transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(0, 219, 222, 0.4);
+        box-shadow: 0 10px 30px rgba(2, 132, 199, 0.3);
       }
 
       button:disabled {
@@ -259,17 +269,19 @@
       }
 
       .analysis-card {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(26, 26, 46, 0.8);
         padding: 30px;
         border-radius: 15px;
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: transform 0.3s;
+        border: 1px solid rgba(229, 69, 96, 0.2);
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
       .analysis-card:hover {
         transform: translateY(-5px);
-        border-color: #00dbde;
+        border-color: var(--harmony-accent);
+        box-shadow: 0 8px 24px rgba(229, 69, 96, 0.3);
       }
 
       .analysis-label {
@@ -284,15 +296,16 @@
       .analysis-value {
         font-size: 3.5em;
         font-weight: 800;
-        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        background: var(--harmony-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
         line-height: 1;
       }
 
       .camelot-badge {
         display: inline-block;
-        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        background: var(--harmony-gradient);
         color: white;
         padding: 12px 30px;
         border-radius: 25px;
@@ -561,9 +574,10 @@
       .counter-value {
         font-size: 2em;
         font-weight: 800;
-        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        background: var(--harmony-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       @keyframes spin {
