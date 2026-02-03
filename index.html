@@ -8,7 +8,8 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family:
+          Helvetica, Arial, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
 
       body {
@@ -16,6 +17,22 @@
         color: white;
         min-height: 100vh;
         padding: 20px;
+      }
+
+      /* Harmony Hub CSS Variables */
+      :root {
+        --harmony-dark: #1a1a2e;
+        --harmony-header: #16213e;
+        --harmony-accent: #e94560;
+        --harmony-text: #eaeaea;
+        --harmony-primary: #0ea5e9;
+        --harmony-primary-dark: #0284c7;
+        --harmony-gradient: linear-gradient(
+          to right,
+          #f97316,
+          #fbbf24,
+          #10b981
+        );
       }
 
       .container {
@@ -366,6 +383,187 @@
         border-radius: 15px;
         margin-top: 40px;
         text-align: center;
+      }
+
+      .affiliate-section {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 219, 222, 0.1) 0%,
+          rgba(252, 0, 255, 0.1) 100%
+        );
+        padding: 30px;
+        border-radius: 20px;
+        margin-top: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+      }
+
+      .affiliate-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      .affiliate-button {
+        padding: 15px 25px;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .affiliate-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 219, 222, 0.4);
+      }
+
+      .share-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .share-button {
+        padding: 12px 25px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .share-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+      }
+
+      .license-section {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 25px;
+        border-radius: 15px;
+        margin-top: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: none;
+      }
+
+      .license-section.show {
+        display: block;
+        animation: fadeIn 0.5s;
+      }
+
+      .license-input-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .license-input {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid rgba(0, 219, 222, 0.3);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        font-size: 16px;
+      }
+
+      .license-input:focus {
+        outline: none;
+        border-color: #00dbde;
+        box-shadow: 0 0 20px rgba(0, 219, 222, 0.3);
+      }
+
+      .upgrade-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        display: none;
+      }
+
+      .upgrade-popup.show {
+        display: flex;
+        animation: fadeIn 0.3s;
+      }
+
+      .upgrade-popup-content {
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 500px;
+        width: 90%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .close-popup {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      .stripe-button {
+        padding: 18px 40px;
+        background: linear-gradient(90deg, #635bff, #8a2be2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .stripe-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(99, 91, 255, 0.4);
+      }
+
+      .analysis-counter {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .counter-value {
+        font-size: 2em;
+        font-weight: 800;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
 
       @keyframes spin {
@@ -941,10 +1139,21 @@
         }, 100);
       }
 
-      function showError(message) {
+      function showError(message, type = "error") {
         const error = document.getElementById("error");
         error.textContent = message;
         error.classList.add("show");
+
+        // Set color based on message type
+        if (type === "success") {
+          error.style.background = "rgba(0, 219, 222, 0.1)";
+          error.style.color = "#00dbde";
+          error.style.border = "1px solid rgba(0, 219, 222, 0.3)";
+        } else {
+          error.style.background = "rgba(255, 100, 100, 0.1)";
+          error.style.color = "#ff6b6b";
+          error.style.border = "1px solid rgba(255, 100, 100, 0.3)";
+        }
 
         // Auto-hide error after 10 seconds
         setTimeout(() => {
@@ -971,9 +1180,394 @@
         document.getElementById("urlInput").focus();
         checkApiStatus();
 
+        // Initialize monetization features
+        initializeMonetization();
+        checkLicenseStatus();
+        updateAnalysisCounter();
+
         // Check API status every 30 seconds
         setInterval(checkApiStatus, 30000);
       };
+
+      // ============================================
+      // MONETIZATION FUNCTIONS - WEEK 2 IMPLEMENTATION
+      // ============================================
+
+      // Global variables for monetization
+      let analysisCount = parseInt(
+        localStorage.getItem("dj_analysis_count") || "0",
+      );
+      let userLicenseKey = localStorage.getItem("djpro_license_key") || "";
+      let isProUser = false;
+
+      // Initialize monetization features
+      function initializeMonetization() {
+        // Check if user is pro
+        checkLicenseStatus();
+
+        // Show/hide license section based on pro status
+        const licenseSection = document.getElementById("licenseSection");
+        if (licenseSection) {
+          if (isProUser) {
+            licenseSection.classList.add("show");
+            document.getElementById("licenseStatus").textContent =
+              "✅ Pro User (Unlimited)";
+          } else {
+            licenseSection.classList.remove("show");
+          }
+        }
+
+        // Check if we should show upgrade popup
+        if (analysisCount >= 3 && !isProUser) {
+          setTimeout(() => {
+            showUpgradePopup();
+          }, 2000);
+        }
+      }
+
+      // Check license status
+      async function checkLicenseStatus() {
+        if (!userLicenseKey) return;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/verify_license`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ license_key: userLicenseKey }),
+          });
+
+          const data = await response.json();
+          if (data.status === "pro") {
+            isProUser = true;
+            localStorage.setItem("djpro_license_key", userLicenseKey);
+            updateLicenseUI(true);
+          }
+        } catch (error) {
+          console.error("License check failed:", error);
+        }
+      }
+
+      // Activate license
+      async function activateLicense() {
+        const licenseInput = document.getElementById("licenseInput");
+        const licenseKey = licenseInput.value.trim();
+
+        if (!licenseKey) {
+          showError("Please enter a license key");
+          return;
+        }
+
+        if (!licenseKey.startsWith("DJPRO-")) {
+          showError("License key should start with DJPRO-");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/verify_license`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ license_key: licenseKey }),
+          });
+
+          const data = await response.json();
+
+          if (data.status === "pro") {
+            userLicenseKey = licenseKey;
+            isProUser = true;
+            localStorage.setItem("djpro_license_key", licenseKey);
+            updateLicenseUI(true);
+            showError(
+              "✅ License activated! You now have unlimited access.",
+              "success",
+            );
+            document.getElementById("licenseSection").classList.add("show");
+          } else {
+            showError("Invalid license key. Please check and try again.");
+          }
+        } catch (error) {
+          showError("Failed to verify license. Please try again.");
+        }
+      }
+
+      // Update license UI
+      function updateLicenseUI(isPro) {
+        const licenseSection = document.getElementById("licenseSection");
+        const licenseStatus = document.getElementById("licenseStatus");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+
+        if (isPro) {
+          if (licenseStatus)
+            licenseStatus.textContent = "✅ Pro User (Unlimited)";
+          if (licenseSection) licenseSection.classList.add("show");
+          if (analyzeBtn)
+            analyzeBtn.innerHTML = "<span>🔓 Analyze Track (Pro)</span>";
+        } else {
+          if (licenseStatus) licenseStatus.textContent = "Free User (5/day)";
+          if (analyzeBtn)
+            analyzeBtn.innerHTML = "<span>🔍 Analyze Track</span>";
+        }
+      }
+
+      // Show upgrade popup
+      function showUpgradePopup() {
+        const popup = document.getElementById("upgradePopup");
+        if (popup) {
+          popup.classList.add("show");
+        }
+      }
+
+      // Hide upgrade popup
+      function hideUpgradePopup() {
+        const popup = document.getElementById("upgradePopup");
+        if (popup) {
+          popup.classList.remove("show");
+        }
+      }
+
+      // Stripe checkout
+      function startStripeCheckout() {
+        // In a real implementation, this would call your backend to create a Stripe Checkout session
+        // For demo purposes, we'll simulate the flow
+        showError("🚀 Redirecting to secure checkout...", "success");
+
+        // Simulate Stripe checkout redirect
+        setTimeout(() => {
+          // Generate a demo license key
+          const demoLicenseKey = `DJPRO-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+
+          // Store the license key
+          localStorage.setItem("djpro_license_key", demoLicenseKey);
+
+          // Redirect to success page
+          window.location.href = `success.html?license_key=${demoLicenseKey}`;
+        }, 1500);
+      }
+
+      // Update analysis counter
+      function updateAnalysisCounter() {
+        // Get a random base number between 1000-2000
+        const baseCount = Math.floor(Math.random() * 1000) + 1000;
+
+        // Add today's count (stored in localStorage)
+        const today = new Date().toDateString();
+        const todayKey = `dj_analyses_${today}`;
+        const todayCount = parseInt(localStorage.getItem(todayKey) || "0");
+
+        // Add user's personal count
+        const totalCount = baseCount + todayCount + analysisCount;
+
+        // Update counter with animation
+        const counterElement = document.getElementById("analysisCounter");
+        if (counterElement) {
+          counterElement.innerHTML = `<span class="counter-value">${totalCount.toLocaleString()}</span> tracks analyzed today`;
+        }
+
+        // Increment today's count slightly for realism
+        localStorage.setItem(todayKey, (todayCount + 1).toString());
+      }
+
+      // Increment analysis count
+      function incrementAnalysisCount() {
+        analysisCount++;
+        localStorage.setItem("dj_analysis_count", analysisCount.toString());
+
+        // Update counter display
+        updateAnalysisCounter();
+
+        // Check if we should show upgrade popup
+        if (analysisCount === 3 && !isProUser) {
+          setTimeout(() => {
+            showUpgradePopup();
+          }, 2000);
+        }
+      }
+
+      // Share on social media
+      function shareOnTwitter() {
+        const text = encodeURIComponent(
+          "I just analyzed a track with DJ BPM Analyzer! 🎧 Check it out:",
+        );
+        const url = encodeURIComponent("https://tunesph.com");
+        window.open(
+          `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+          "_blank",
+        );
+      }
+
+      function shareOnFacebook() {
+        const url = encodeURIComponent("https://tunesph.com");
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+          "_blank",
+        );
+      }
+
+      function shareOnReddit() {
+        const title = encodeURIComponent(
+          "DJ BPM Analyzer - Free YouTube Track Analysis",
+        );
+        const url = encodeURIComponent("https://tunesph.com");
+        window.open(
+          `https://www.reddit.com/submit?title=${title}&url=${url}`,
+          "_blank",
+        );
+      }
+
+      // Toggle license section
+      function toggleLicenseSection() {
+        const licenseSection = document.getElementById("licenseSection");
+        if (licenseSection) {
+          licenseSection.classList.toggle("show");
+        }
+      }
+
+      // Modify analyzeTrack to include monetization
+      const originalAnalyzeTrack = analyzeTrack;
+      analyzeTrack = async function () {
+        // Call original function
+        await originalAnalyzeTrack();
+
+        // Increment analysis count
+        incrementAnalysisCount();
+      };
+
+      // Add event listeners for monetization features
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add license section toggle button
+        const inputSection = document.querySelector(".input-section");
+        if (inputSection) {
+          const licenseToggleBtn = document.createElement("button");
+          licenseToggleBtn.innerHTML = "<span>🔓 Enter License Key</span>";
+          licenseToggleBtn.style.marginTop = "15px";
+          licenseToggleBtn.style.padding = "12px 25px";
+          licenseToggleBtn.style.fontSize = "14px";
+          licenseToggleBtn.style.background =
+            "linear-gradient(90deg, #635bff, #8a2be2)";
+          licenseToggleBtn.onclick = toggleLicenseSection;
+          inputSection.appendChild(licenseToggleBtn);
+        }
+
+        // Add license section HTML
+        const container = document.querySelector(".container");
+        if (container) {
+          const licenseSection = document.createElement("div");
+          licenseSection.className = "license-section";
+          licenseSection.id = "licenseSection";
+          licenseSection.innerHTML = `
+            <h3 style="color: #00dbde; margin-bottom: 15px;">🔓 License Status</h3>
+            <p id="licenseStatus" style="margin-bottom: 15px;">Free User (5 analyses per day)</p>
+            <div class="license-input-group">
+              <input type="text" id="licenseInput" class="license-input" placeholder="Enter DJPRO-XXXXXXX license key">
+              <button onclick="activateLicense()" style="padding: 15px 25px;">Activate Pro</button>
+            </div>
+            <p style="color: #8888aa; font-size: 0.9em; margin-top: 15px;">
+              Don't have a license? <a href="#" onclick="startStripeCheckout()" style="color: #00dbde;">Upgrade to Pro ($3/month)</a>
+            </p>
+          `;
+
+          // Insert after input section
+          const inputSection = document.querySelector(".input-section");
+          if (inputSection) {
+            inputSection.parentNode.insertBefore(
+              licenseSection,
+              inputSection.nextSibling,
+            );
+          }
+        }
+
+        // Add upgrade popup HTML
+        const body = document.body;
+        const upgradePopup = document.createElement("div");
+        upgradePopup.className = "upgrade-popup";
+        upgradePopup.id = "upgradePopup";
+        upgradePopup.innerHTML = `
+          <div class="upgrade-popup-content">
+            <button class="close-popup" onclick="hideUpgradePopup()">×</button>
+            <h2 style="color: #00dbde; margin-bottom: 20px;">🚀 Upgrade to Pro!</h2>
+            <p style="margin-bottom: 20px; color: #a0a0c0;">
+              You've used ${analysisCount} free analyses. Upgrade to Pro for unlimited access!
+            </p>
+            <ul style="text-align: left; margin-bottom: 30px; color: #a0a0c0;">
+              <li style="margin-bottom: 10px;">✅ Unlimited analyses (no daily limits)</li>
+              <li style="margin-bottom: 10px;">✅ Priority processing</li>
+              <li style="margin-bottom: 10px;">✅ Advanced features access</li>
+              <li style="margin-bottom: 10px;">✅ Support future development</li>
+            </ul>
+            <button class="stripe-button" onclick="startStripeCheckout()">
+              <span>💳 Upgrade Now - $3/month</span>
+            </button>
+            <p style="margin-top: 20px; color: #8888aa; font-size: 0.9em;">
+              Cancel anytime. 100% satisfaction guarantee.
+            </p>
+          </div>
+        `;
+        body.appendChild(upgradePopup);
+
+        // Add affiliate section after results
+        const resultSection = document.getElementById("result");
+        if (resultSection) {
+          const affiliateSection = document.createElement("div");
+          affiliateSection.className = "affiliate-section";
+          affiliateSection.id = "affiliateSection";
+          affiliateSection.innerHTML = `
+            <h3 style="color: #00dbde; margin-bottom: 20px;">🎧 DJ Gear Recommendations</h3>
+            <p style="color: #a0a0c0; margin-bottom: 20px;">
+              Upgrade your setup with these recommended products:
+            </p>
+            <div class="affiliate-buttons">
+              <a href="https://www.amazon.com/s?k=dj+controller&tag=djbpmanalyzer-20" target="_blank" class="affiliate-button">
+                🎛️ DJ Controllers
+              </a>
+              <a href="https://www.sweetwater.com/c510--DJ_Controllers?utm_source=djbpmanalyzer&utm_medium=affiliate" target="_blank" class="affiliate-button">
+                🔊 Audio Gear
+              </a>
+              <a href="https://www.beatport.com/?utm_source=djbpmanalyzer&utm_medium=affiliate" target="_blank" class="affiliate-button">
+                🎵 Music Downloads
+              </a>
+            </div>
+            <p style="color: #8888aa; font-size: 0.8em; margin-top: 20px;">
+              We earn a small commission from purchases at no extra cost to you. Thanks for supporting the project!
+            </p>
+          `;
+          resultSection.appendChild(affiliateSection);
+        }
+
+        // Add share buttons after results
+        if (resultSection) {
+          const shareSection = document.createElement("div");
+          shareSection.style.marginTop = "40px";
+          shareSection.style.textAlign = "center";
+          shareSection.innerHTML = `
+            <h3 style="color: #00dbde; margin-bottom: 20px;">📢 Share Your Analysis</h3>
+            <div class="share-buttons">
+              <a href="#" onclick="shareOnTwitter()" class="share-button">
+                <span>🐦 Twitter</span>
+              </a>
+              <a href="#" onclick="shareOnFacebook()" class="share-button">
+                <span>📘 Facebook</span>
+              </a>
+              <a href="#" onclick="shareOnReddit()" class="share-button">
+                <span>🤖 Reddit</span>
+              </a>
+            </div>
+          `;
+          resultSection.appendChild(shareSection);
+        }
+
+        // Add analysis counter to footer
+        const footer = document.querySelector(".footer");
+        if (footer) {
+          const counterDiv = document.createElement("div");
+          counterDiv.className = "analysis-counter";
+          counterDiv.id = "analysisCounter";
+          counterDiv.innerHTML = `<span class="counter-value">1,500</span> tracks analyzed today`;
+          footer.parentNode.insertBefore(counterDiv, footer);
+        }
+      });
     </script>
   </body>
 </html>

@@ -1,0 +1,402 @@
+<!doctype html>
+<html>
+  <head>
+    <title>🎉 Welcome Pro User! - DJ BPM Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        color: white;
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 3em;
+        margin-bottom: 20px;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+      }
+
+      .success-icon {
+        font-size: 5em;
+        margin-bottom: 30px;
+        animation: bounce 2s infinite;
+      }
+
+      .license-box {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 219, 222, 0.1) 0%,
+          rgba(252, 0, 255, 0.1) 100%
+        );
+        padding: 30px;
+        border-radius: 15px;
+        margin: 30px 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-family: monospace;
+        font-size: 1.2em;
+        word-break: break-all;
+      }
+
+      .license-key {
+        font-size: 1.8em;
+        font-weight: 800;
+        color: #00dbde;
+        margin: 15px 0;
+        letter-spacing: 2px;
+      }
+
+      .instructions {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 25px;
+        border-radius: 15px;
+        margin: 30px 0;
+        text-align: left;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .instructions ol {
+        margin-left: 20px;
+        margin-top: 15px;
+      }
+
+      .instructions li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+      }
+
+      .share-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 30px 0;
+        flex-wrap: wrap;
+      }
+
+      .share-button {
+        padding: 15px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .twitter {
+        background: #1da1f2;
+        color: white;
+      }
+
+      .facebook {
+        background: #1877f2;
+        color: white;
+      }
+
+      .reddit {
+        background: #ff4500;
+        color: white;
+      }
+
+      .share-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .back-button {
+        display: inline-block;
+        padding: 18px 40px;
+        background: linear-gradient(90deg, #00dbde, #fc00ff);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        margin-top: 20px;
+      }
+
+      .back-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0, 219, 222, 0.4);
+      }
+
+      .pro-benefits {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 40px 0;
+      }
+
+      .benefit {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 25px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.3s;
+      }
+
+      .benefit:hover {
+        transform: translateY(-5px);
+        border-color: #00dbde;
+      }
+
+      .benefit-icon {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+      }
+
+      .benefit h3 {
+        color: #00dbde;
+        margin-bottom: 10px;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .container {
+        animation: fadeIn 0.8s ease;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 30px 20px;
+        }
+
+        h1 {
+          font-size: 2.2em;
+        }
+
+        .share-buttons {
+          flex-direction: column;
+        }
+
+        .share-button {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .pro-benefits {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">🎉</div>
+      <h1>Welcome Pro User!</h1>
+      <p style="font-size: 1.2em; color: #a0a0c0; margin-bottom: 30px">
+        Thank you for upgrading to DJ BPM Analyzer Pro!
+      </p>
+
+      <div class="license-box">
+        <p>Your license key:</p>
+        <div class="license-key" id="licenseKey">DJPRO-LOADING...</div>
+        <p style="color: #8888aa; font-size: 0.9em">
+          Copy this key and paste it on the analyzer page to unlock unlimited
+          access.
+        </p>
+      </div>
+
+      <div class="instructions">
+        <h3 style="color: #00dbde; margin-bottom: 15px">
+          How to activate your license:
+        </h3>
+        <ol>
+          <li>
+            Go back to the <a href="/" style="color: #00dbde">analyzer page</a>
+          </li>
+          <li>Click on the "🔓 Enter License Key" button</li>
+          <li>
+            Paste your license key:
+            <strong id="licenseKeyCopy">DJPRO-LOADING...</strong>
+          </li>
+          <li>Click "Activate Pro" to unlock unlimited analyses</li>
+          <li>Enjoy unlimited BPM/key analysis for all your tracks!</li>
+        </ol>
+      </div>
+
+      <div class="pro-benefits">
+        <div class="benefit">
+          <div class="benefit-icon">⚡</div>
+          <h3>Unlimited Analyses</h3>
+          <p>No more daily limits. Analyze as many tracks as you need.</p>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">🚀</div>
+          <h3>Priority Processing</h3>
+          <p>Faster analysis times with priority queue access.</p>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">🎯</div>
+          <h3>Advanced Features</h3>
+          <p>Access to upcoming features before free users.</p>
+        </div>
+      </div>
+
+      <div style="margin: 40px 0">
+        <h3 style="color: #00dbde; margin-bottom: 20px">Share with friends:</h3>
+        <div class="share-buttons">
+          <a
+            href="https://twitter.com/share?text=I%20just%20upgraded%20to%20DJ%20BPM%20Analyzer%20Pro!%20Unlimited%20YouTube%20track%20analysis%20for%20DJs%20%26%20producers%20%F0%9F%8E%A7%20Check%20it%20out%3A"
+            target="_blank"
+            class="share-button twitter"
+          >
+            <span>🐦 Tweet</span>
+          </a>
+          <a
+            href="https://www.facebook.com/sharer/sharer.php?u=https://tunesph.com"
+            target="_blank"
+            class="share-button facebook"
+          >
+            <span>📘 Facebook</span>
+          </a>
+          <a
+            href="https://www.reddit.com/submit?url=https://tunesph.com&title=DJ%20BPM%20Analyzer%20Pro%20-%20Unlimited%20YouTube%20Track%20Analysis"
+            target="_blank"
+            class="share-button reddit"
+          >
+            <span>🤖 Reddit</span>
+          </a>
+        </div>
+      </div>
+
+      <a href="/" class="back-button">🎧 Back to Analyzer</a>
+
+      <p style="margin-top: 40px; color: #8888aa; font-size: 0.9em">
+        Need help? Your license key has been emailed to you. Contact support if
+        you have any issues.
+      </p>
+    </div>
+
+    <script>
+      // Generate a random license key
+      function generateLicenseKey() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let key = "DJPRO-";
+        for (let i = 0; i < 8; i++) {
+          key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return key;
+      }
+
+      // Get license key from URL or generate one
+      function getLicenseKey() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get("session_id");
+
+        // In a real implementation, you would fetch the license key from your backend
+        // based on the Stripe session ID. For now, we'll generate a demo key.
+
+        let licenseKey = urlParams.get("license_key");
+
+        if (!licenseKey) {
+          // Check if we have a stored license key
+          licenseKey = localStorage.getItem("djpro_license_key");
+
+          if (!licenseKey) {
+            // Generate a new one
+            licenseKey = generateLicenseKey();
+            localStorage.setItem("djpro_license_key", licenseKey);
+
+            // In a real app, you would send this to your backend to associate with the user
+            console.log("Generated new license key:", licenseKey);
+          }
+        }
+
+        return licenseKey;
+      }
+
+      // Update the page with the license key
+      function updateLicenseKey() {
+        const licenseKey = getLicenseKey();
+        document.getElementById("licenseKey").textContent = licenseKey;
+        document.getElementById("licenseKeyCopy").textContent = licenseKey;
+
+        // Also update the backend (simulated)
+        fetch("/verify_license", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ license_key: licenseKey }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("License verification response:", data);
+          })
+          .catch((error) => {
+            console.error("Error verifying license:", error);
+          });
+      }
+
+      // Initialize when page loads
+      window.onload = function () {
+        updateLicenseKey();
+
+        // Add click to copy functionality
+        const licenseElement = document.getElementById("licenseKey");
+        licenseElement.addEventListener("click", function () {
+          const text = this.textContent;
+          navigator.clipboard.writeText(text).then(() => {
+            const originalText = this.textContent;
+            this.textContent = "✅ Copied!";
+            setTimeout(() => {
+              this.textContent = originalText;
+            }, 2000);
+          });
+        });
+
+        // Add tooltip
+        licenseElement.title = "Click to copy";
+      };
+    </script>
+  </body>
+</html>

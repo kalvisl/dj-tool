@@ -1,7 +1,7 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 import requests
 import random
@@ -19,8 +19,74 @@ import queue
 from typing import Optional, Tuple, Dict, Any, List
 from pathlib import Path
 from datetime import datetime, timedelta
+from collections import defaultdict
 
 app = FastAPI(title="DJ BPM Analyzer with Background Jobs")
+
+# Rate limiting configuration
+FREE_LIMIT_PER_DAY = 5  # Free users get 5 analyses per day
+PRO_LIMIT_PER_DAY = 1000  # Pro users get 1000 analyses per day (effectively unlimited)
+
+# In-memory rate limiting storage (upgrade to Redis in production)
+user_counts = defaultdict(int)  # key: "ip:date" -> count
+user_licenses = {}  # key: license_key -> {"status": "pro", "created_at": timestamp}
+license_lock = threading.Lock()
+
+def get_client_ip(request: Request) -> str:
+    """Extract client IP from request"""
+    # Try to get IP from X-Forwarded-For header (common in proxy setups)
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        # X-Forwarded-For can contain multiple IPs, take the first one
+        return forwarded.split(",")[0].strip()
+    
+    # Fall back to client host
+    return request.client.host if request.client else "unknown"
+
+def check_rate_limit(ip: str, license_key: str = None) -> Dict[str, Any]:
+    """Check if user has exceeded rate limits"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Check if user has a valid pro license
+    is_pro = False
+    if license_key:
+        with license_lock:
+            if license_key in user_licenses:
+                license_info = user_licenses[license_key]
+                # Check if license is still valid (not expired)
+                if license_info.get("status") == "pro":
+                    is_pro = True
+    
+    # Determine limit based on user type
+    limit = PRO_LIMIT_PER_DAY if is_pro else FREE_LIMIT_PER_DAY
+    
+    # Create key for tracking
+    key = f"{ip}:{today}"
+    
+    # Check current count
+    current_count = user_counts.get(key, 0)
+    
+    if current_count >= limit:
+        return {
+            "allowed": False,
+            "limit": limit,
+            "used": current_count,
+            "remaining": 0,
+            "is_pro": is_pro,
+            "message": f"Daily limit reached ({limit} analyses per day). Upgrade to Pro for unlimited access."
+        }
+    
+    # Increment count
+    user_counts[key] = current_count + 1
+    
+    return {
+        "allowed": True,
+        "limit": limit,
+        "used": current_count + 1,
+        "remaining": limit - (current_count + 1),
+        "is_pro": is_pro,
+        "message": f"Analysis allowed ({current_count + 1}/{limit} used today)"
+    }
 
 # Job and progress tracking
 job_store = {}
@@ -606,10 +672,39 @@ async def api_info():
     }
 
 @app.get("/analyze")
-async def analyze(url: str):
+async def analyze(url: str, request: Request, license_key: str = None):
     """Immediate analysis endpoint - always works with smart fallbacks"""
     try:
         print(f"🎯 Immediate analysis request: {url}")
+        
+        # Check rate limit
+        client_ip = get_client_ip(request)
+        rate_limit_result = check_rate_limit(client_ip, license_key)
+        
+        if not rate_limit_result["allowed"]:
+            return {
+                "status": "rate_limit",
+                "bpm": 0,
+                "key": "N/A",
+                "camelot": "N/A",
+                "energy": 0,
+                "title": "Rate Limit Exceeded",
+                "artist": "Upgrade to Pro",
+                "duration": 0,
+                "duration_formatted": "0:00",
+                "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                "video_id": "rate_limit",
+                "message": rate_limit_result["message"],
+                "analysis_type": "Rate limited",
+                "confidence": 0,
+                "rate_limit_info": {
+                    "allowed": False,
+                    "limit": rate_limit_result["limit"],
+                    "used": rate_limit_result["used"],
+                    "remaining": rate_limit_result["remaining"],
+                    "is_pro": rate_limit_result["is_pro"]
+                }
+            }
         
         # Get video info
         info = get_video_info(url)
@@ -662,7 +757,14 @@ async def analyze(url: str):
             "video_id": info["video_id"],
             "message": "✅ Smart analysis complete",
             "analysis_type": "AI-powered genre detection",
-            "confidence": confidence
+            "confidence": confidence,
+            "rate_limit_info": {
+                "allowed": True,
+                "limit": rate_limit_result["limit"],
+                "used": rate_limit_result["used"],
+                "remaining": rate_limit_result["remaining"],
+                "is_pro": rate_limit_result["is_pro"]
+            }
         }
         
     except Exception as e:
@@ -804,6 +906,100 @@ async def cleanup_cache_endpoint():
         }
     except Exception as e:
         return {"status": "error", "message": f"Failed to cleanup cache: {str(e)}"}
+
+# License validation endpoint (Day 4)
+@app.post("/verify_license")
+async def verify_license(license_key: str):
+    """Verify a license key"""
+    try:
+        with license_lock:
+            if license_key in user_licenses:
+                license_info = user_licenses[license_key]
+                return {
+                    "status": "pro",
+                    "message": "Unlimited access granted",
+                    "license_key": license_key,
+                    "created_at": license_info.get("created_at"),
+                    "human_created": datetime.fromtimestamp(license_info.get("created_at", time.time())).strftime('%Y-%m-%d %H:%M:%S')
+                }
+            else:
+                # Check if it's a valid format (starts with DJPRO-)
+                if license_key.startswith("DJPRO-"):
+                    # Generate a new license
+                    new_license = {
+                        "status": "pro",
+                        "created_at": time.time(),
+                        "license_key": license_key
+                    }
+                    user_licenses[license_key] = new_license
+                    return {
+                        "status": "pro",
+                        "message": "License activated! Unlimited access granted",
+                        "license_key": license_key,
+                        "created_at": new_license["created_at"],
+                        "human_created": datetime.fromtimestamp(new_license["created_at"]).strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                else:
+                    return {
+                        "status": "free",
+                        "limit": FREE_LIMIT_PER_DAY,
+                        "message": "Free user (5 analyses per day)",
+                        "license_key": license_key
+                    }
+    except Exception as e:
+        return {"status": "error", "message": f"License verification failed: {str(e)}"}
+
+# Generate a new license key
+@app.get("/generate_license")
+async def generate_license():
+    """Generate a new license key (for testing/demo)"""
+    license_key = f"DJPRO-{uuid.uuid4().hex[:8].upper()}"
+    
+    with license_lock:
+        user_licenses[license_key] = {
+            "status": "pro",
+            "created_at": time.time(),
+            "license_key": license_key
+        }
+    
+    return {
+        "status": "success",
+        "license_key": license_key,
+        "message": "License generated successfully",
+        "created_at": time.time(),
+        "human_created": datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+# Get rate limit status
+@app.get("/rate_limit_status")
+async def rate_limit_status(request: Request, license_key: str = None):
+    """Get current rate limit status for user"""
+    client_ip = get_client_ip(request)
+    today = datetime.now().strftime("%Y-%m-%d")
+    key = f"{client_ip}:{today}"
+    
+    # Check if user has a valid pro license
+    is_pro = False
+    if license_key:
+        with license_lock:
+            if license_key in user_licenses:
+                license_info = user_licenses[license_key]
+                if license_info.get("status") == "pro":
+                    is_pro = True
+    
+    limit = PRO_LIMIT_PER_DAY if is_pro else FREE_LIMIT_PER_DAY
+    current_count = user_counts.get(key, 0)
+    
+    return {
+        "ip": client_ip,
+        "date": today,
+        "is_pro": is_pro,
+        "limit": limit,
+        "used": current_count,
+        "remaining": limit - current_count,
+        "percentage_used": round((current_count / limit) * 100, 1) if limit > 0 else 0,
+        "message": f"{current_count}/{limit} analyses used today"
+    }
 
 # Start workers when the app starts
 @app.on_event("startup")
