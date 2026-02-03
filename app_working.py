@@ -16,10 +16,25 @@ import shutil
 import uuid
 import threading
 import queue
+import logging
 from typing import Optional, Tuple, Dict, Any, List
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('dj_tool.log', encoding='utf-8')
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# Log startup
+logger.info("DJ BPM Analyzer logging initialized")
 
 app = FastAPI(title="DJ BPM Analyzer with Background Jobs")
 
@@ -156,7 +171,7 @@ def create_job(url: str, video_id: str) -> str:
     
     # Add to queue
     job_queue.put(job_id)
-    print(f"📝 Created job {job_id} for video {video_id}")
+    logger.info(f"Created job {job_id} for video {video_id}")
     
     return job_id
 
@@ -190,7 +205,7 @@ def clear_progress(video_id: str):
 
 def worker_thread(worker_id: int):
     """Worker thread that processes jobs from the queue"""
-    print(f"👷 Worker {worker_id} started")
+    logger.info(f"Worker {worker_id} started")
     
     while True:
         try:
@@ -200,7 +215,7 @@ def worker_thread(worker_id: int):
             
             job = get_job(job_id)
             if not job:
-                print(f"⚠️  Worker {worker_id}: Job {job_id} not found")
+                logger.warning(f"Worker {worker_id}: Job {job_id} not found")
                 continue
             
             # Update job status
@@ -211,7 +226,7 @@ def worker_thread(worker_id: int):
                       progress=10,
                       message="Starting audio analysis...")
             
-            print(f"👷 Worker {worker_id} processing job {job_id} for video {job.video_id}")
+            logger.info(f"Worker {worker_id} processing job {job_id} for video {job.video_id}")
             
             try:
                 # Run the analysis
@@ -225,7 +240,7 @@ def worker_thread(worker_id: int):
                               progress=100,
                               message="Analysis completed successfully",
                               result=result)
-                    print(f"✅ Worker {worker_id} completed job {job_id}")
+                    logger.info(f"Worker {worker_id} completed job {job_id}")
                 else:
                     update_job(job_id,
                               status="failed",
@@ -234,7 +249,7 @@ def worker_thread(worker_id: int):
                               progress=0,
                               message="Analysis failed",
                               error="Analysis returned no result")
-                    print(f"❌ Worker {worker_id} failed job {job_id}")
+                    logger.error(f"Worker {worker_id} failed job {job_id}")
             
             except Exception as e:
                 update_job(job_id,
@@ -244,7 +259,7 @@ def worker_thread(worker_id: int):
                           progress=0,
                           message=f"Analysis error: {str(e)[:100]}",
                           error=str(e))
-                print(f"❌ Worker {worker_id} error on job {job_id}: {e}")
+                logger.error(f"Worker {worker_id} error on job {job_id}: {e}")
             
             finally:
                 job_queue.task_done()
@@ -252,7 +267,7 @@ def worker_thread(worker_id: int):
         except queue.Empty:
             continue
         except Exception as e:
-            print(f"❌ Worker {worker_id} error: {e}")
+            logger.error(f"Worker {worker_id} error: {e}")
             time.sleep(1)
 
 def process_analysis_job(job: AnalysisJob) -> Optional[Dict[str, Any]]:
@@ -260,14 +275,14 @@ def process_analysis_job(job: AnalysisJob) -> Optional[Dict[str, Any]]:
     try:
         # Check cache first
         if is_cache_valid(job.video_id):
-            print(f"📂 Cache hit for {job.video_id}")
+            logger.info(f"Cache hit for {job.video_id}")
             update_job(job.job_id, stage="cached", progress=100, message="Loaded from cache")
             result = load_from_cache(job.video_id)
             if result:
                 return create_result_dict(job, result, "Real audio analysis (cached)")
             # If cache load fails, continue with analysis
         
-        print(f"🔍 Cache miss for {job.video_id}, downloading...")
+        logger.info(f"Cache miss for {job.video_id}, downloading...")
         
         # Initialize progress
         update_job(job.job_id, stage="starting", progress=10, message="Starting audio analysis...")
@@ -300,7 +315,7 @@ def process_analysis_job(job: AnalysisJob) -> Optional[Dict[str, Any]]:
             return None
             
     except Exception as e:
-        print(f"❌ Analysis job error: {e}")
+        logger.error(f"Analysis job error: {e}")
         update_job(job.job_id, stage="error", progress=0, message=f"Analysis error: {str(e)[:100]}")
         return None
 
@@ -439,11 +454,11 @@ def analyze_audio_file(audio_path: str, video_id: str = "", job_id: str = "") ->
         if job_id:
             update_job(job_id, stage="complete", progress=100, message="Audio analysis complete")
         
-        print(f"✅ Audio analysis: BPM={bpm:.1f}, Key={key_name}, Camelot={camelot}, Energy={normalized_energy:.2f}")
+        logger.info(f"Audio analysis: BPM={bpm:.1f}, Key={key_name}, Camelot={camelot}, Energy={normalized_energy:.2f}")
         return bpm, key_name, camelot, normalized_energy
         
     except Exception as e:
-        print(f"❌ Audio analysis error: {e}")
+        logger.error(f"Audio analysis error: {e}")
         
         if job_id:
             update_job(job_id, stage="error", progress=0, message=f"Audio analysis error: {str(e)[:100]}")
@@ -467,14 +482,14 @@ def download_audio_from_youtube(url: str, output_path: str, video_id: str = "", 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         
         if result.returncode == 0:
-            print(f"✅ Audio downloaded successfully: {output_path}")
+            logger.info(f"Audio downloaded successfully: {output_path}")
             
             if job_id:
                 update_job(job_id, stage="downloading", progress=60, message="Audio download complete")
             
             return True
         else:
-            print(f"❌ yt-dlp failed: {result.stderr}")
+            logger.error(f"yt-dlp failed: {result.stderr}")
             
             if job_id:
                 update_job(job_id, stage="error", progress=0, message=f"Download failed: {result.stderr[:100]}")
@@ -482,14 +497,14 @@ def download_audio_from_youtube(url: str, output_path: str, video_id: str = "", 
             return False
             
     except subprocess.TimeoutExpired:
-        print("❌ Download timed out after 5 minutes")
+        logger.error("Download timed out after 5 minutes")
         
         if job_id:
             update_job(job_id, stage="error", progress=0, message="Download timed out after 5 minutes")
         
         return False
     except Exception as e:
-        print(f"❌ Download error: {e}")
+        logger.error(f"Download error: {e}")
         
         if job_id:
             update_job(job_id, stage="error", progress=0, message=f"Download error: {str(e)[:100]}")
@@ -529,7 +544,7 @@ def is_cache_valid(video_id: str) -> bool:
         expiry_seconds = CACHE_EXPIRY_DAYS * 24 * 60 * 60
         
         if current_time - cache_time > expiry_seconds:
-            print(f"⚠️  Cache expired for {video_id}")
+            logger.warning(f"Cache expired for {video_id}")
             return False
         
         return True
@@ -556,11 +571,11 @@ def save_to_cache(video_id: str, audio_path: str, analysis_result: Tuple[float, 
         with open(metadata_path, 'w') as f:
             json.dump(metadata, f, indent=2)
         
-        print(f"💾 Saved to cache: {video_id}")
+        logger.info(f"Saved to cache: {video_id}")
         cleanup_cache()
         
     except Exception as e:
-        print(f"❌ Cache save error: {e}")
+        logger.error(f"Cache save error: {e}")
 
 def load_from_cache(video_id: str) -> Optional[Tuple[float, str, str, float]]:
     try:
@@ -569,7 +584,7 @@ def load_from_cache(video_id: str) -> Optional[Tuple[float, str, str, float]]:
         with open(metadata_path, 'r') as f:
             metadata = json.load(f)
         
-        print(f"📂 Loaded from cache: {video_id}")
+        logger.info(f"Loaded from cache: {video_id}")
         return (
             metadata['bpm'],
             metadata['key'],
@@ -577,7 +592,7 @@ def load_from_cache(video_id: str) -> Optional[Tuple[float, str, str, float]]:
             metadata['energy']
         )
     except Exception as e:
-        print(f"❌ Cache load error: {e}")
+        logger.error(f"Cache load error: {e}")
         return None
 
 def cleanup_cache():
@@ -616,15 +631,15 @@ def cleanup_cache():
                 entry['metadata_path'].unlink(missing_ok=True)
                 total_size_bytes -= entry['audio_size']
                 removed_count += 1
-                print(f"🗑️  Removed old cache: {entry['video_id']}")
+                logger.info(f"Removed old cache: {entry['video_id']}")
             except:
                 pass
         
         if removed_count > 0:
-            print(f"🧹 Cleaned up {removed_count} old cache entries")
+            logger.info(f"Cleaned up {removed_count} old cache entries")
             
     except Exception as e:
-        print(f"❌ Cache cleanup error: {e}")
+        logger.error(f"Cache cleanup error: {e}")
 
 # Start worker threads
 def start_workers():
@@ -633,7 +648,7 @@ def start_workers():
         worker = threading.Thread(target=worker_thread, args=(i,), daemon=True)
         worker.start()
         workers.append(worker)
-    print(f"🚀 Started {MAX_WORKERS} worker threads")
+    logger.info(f"Started {MAX_WORKERS} worker threads")
 
 # Add CORS middleware
 app.add_middleware(
@@ -653,6 +668,11 @@ async def home():
     """Serve the main frontend HTML page"""
     return FileResponse("index.html")
 
+@app.get("/success.html")
+async def success_page():
+    """Serve the success page for license delivery"""
+    return FileResponse("success.html")
+
 @app.get("/api")
 async def api_info():
     """API information endpoint"""
@@ -660,6 +680,7 @@ async def api_info():
         "message": "🎧 DJ BPM Analyzer v3.0 (with Background Jobs & Cache)",
         "endpoints": {
             "/": "Frontend HTML page",
+            "/success.html": "Success page for license delivery",
             "/api": "This API info page",
             "/analyze": "GET - Immediate analysis (url parameter)",
             "/analyze/background": "POST - Create background analysis job (url parameter)",
@@ -675,13 +696,14 @@ async def api_info():
 async def analyze(url: str, request: Request, license_key: str = None):
     """Immediate analysis endpoint - always works with smart fallbacks"""
     try:
-        print(f"🎯 Immediate analysis request: {url}")
+        logger.info(f"Immediate analysis request: {url}")
         
         # Check rate limit
         client_ip = get_client_ip(request)
         rate_limit_result = check_rate_limit(client_ip, license_key)
         
         if not rate_limit_result["allowed"]:
+            logger.warning(f"Rate limit exceeded for IP {client_ip}, license: {license_key}")
             return {
                 "status": "rate_limit",
                 "bpm": 0,
@@ -743,6 +765,7 @@ async def analyze(url: str, request: Request, license_key: str = None):
         if any(word in title_lower for word in ["house", "techno", "hip hop", "rock", "jazz"]):
             confidence = random.randint(88, 95)
         
+        logger.info(f"Analysis completed for {url}: BPM={bpm}, Key={key}, Camelot={camelot}")
         return {
             "status": "success",
             "bpm": bpm,
@@ -768,7 +791,7 @@ async def analyze(url: str, request: Request, license_key: str = None):
         }
         
     except Exception as e:
-        print(f"⚠️  Error in immediate analysis: {e}")
+        logger.error(f"Error in immediate analysis: {e}")
         # Still return success with demo data
         bpm, (key, camelot) = get_real_bpm_and_key()
         return {
@@ -908,10 +931,16 @@ async def cleanup_cache_endpoint():
         return {"status": "error", "message": f"Failed to cleanup cache: {str(e)}"}
 
 # License validation endpoint (Day 4)
+from pydantic import BaseModel
+
+class LicenseRequest(BaseModel):
+    license_key: str
+
 @app.post("/verify_license")
-async def verify_license(license_key: str):
+async def verify_license(request: LicenseRequest):
     """Verify a license key"""
     try:
+        license_key = request.license_key
         with license_lock:
             if license_key in user_licenses:
                 license_info = user_licenses[license_key]
@@ -1005,7 +1034,7 @@ async def rate_limit_status(request: Request, license_key: str = None):
 @app.on_event("startup")
 async def startup_event():
     start_workers()
-    print("✅ DJ BPM Analyzer with Background Jobs & Cache is ready!")
+    logger.info("DJ BPM Analyzer with Background Jobs & Cache is ready!")
 
 # Main entry point
 if __name__ == "__main__":
